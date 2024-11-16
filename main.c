@@ -104,6 +104,44 @@ void firstinterface() {
     printf("\n\n");
 }
 
+void deletePatientByID(int id) {
+    if (patientHead == NULL) {
+        printf("No patients to delete.\n");
+        return;
+    }
+
+    Patient *temp = patientHead, *prev = NULL;
+
+    // If the head is the patient to delete
+    if (temp->id == id) {
+        patientHead = temp->next;  // Move the head
+        free(temp);                // Free the old head
+        printf("Patient with ID %d deleted successfully.\n", id);
+        savePatientsToFile();  // Save updated patient list to file
+        return;
+    }
+
+    // Search for the patient to delete
+    while (temp != NULL && temp->id != id) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    // If the patient was not found
+    if (temp == NULL) {
+        printf("Patient with ID %d not found.\n", id);
+        return;
+    }
+
+    // Remove the patient from the linked list
+    prev->next = temp->next;
+    free(temp);
+    printf("Patient with ID %d deleted successfully.\n", id);
+
+    // Save updated list to the file
+    savePatientsToFile();
+}
+
 void slowTxt(char* str) {
     system("CLS");
     printf("\n\n");
@@ -175,7 +213,7 @@ void savePatientsToFile() {
     }
 
     fclose(file);
-    printf("Patient data saved successfully.\n");
+    printf("\tPatient data saved successfully.\n");
 }
 
 void addPatient(int id, const char* name, int age, const char* gender, const char* disease, const char* severity) {
@@ -264,7 +302,9 @@ void updatePatient(int id) {
     scanf(" %[^\n]s", patient->gender);
     printf("\tEnter New Patient Disease: ");
     scanf(" %[^\n]s", patient->disease);
-
+    printf("\tEnter Severity (e.g., Mild, Moderate, Severe): ");
+    scanf(" %[^\n]s", patient->severity);
+    savePatientsToFile();
     printf("\tPatient information updated successfully!\n");
 }
 
@@ -295,44 +335,6 @@ void deletePatient(int id) {
     prev->next = temp->next;
     free(temp);
     printf("\tPatient with ID %d deleted successfully.\n", id);
-}
-
-void deletePatientByID(int id) {
-    if (patientHead == NULL) {
-        printf("No patients to delete.\n");
-        return;
-    }
-
-    Patient *temp = patientHead, *prev = NULL;
-
-    // If the head is the patient to delete
-    if (temp->id == id) {
-        patientHead = temp->next;  // Move the head
-        free(temp);                // Free the old head
-        printf("Patient with ID %d deleted successfully.\n", id);
-        savePatientsToFile();  // Save updated patient list to file
-        return;
-    }
-
-    // Search for the patient to delete
-    while (temp != NULL && temp->id != id) {
-        prev = temp;
-        temp = temp->next;
-    }
-
-    // If the patient was not found
-    if (temp == NULL) {
-        printf("Patient with ID %d not found.\n", id);
-        return;
-    }
-
-    // Remove the patient from the linked list
-    prev->next = temp->next;
-    free(temp);
-    printf("Patient with ID %d deleted successfully.\n", id);
-
-    // Save updated list to the file
-    savePatientsToFile();
 }
 
 void initializeDoctors() {
