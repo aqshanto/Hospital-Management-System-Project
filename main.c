@@ -4,14 +4,23 @@
 #include <unistd.h>
 #include <windows.h>
 
+int slots[5][5] = {
+    {3, 5, 4, 2, 6},
+    {4, 3, 5, 2, 1},
+    {6, 4, 3, 2, 5},
+    {2, 3, 5, 6, 4},
+    {5, 6, 4, 3, 2}};
+
 typedef struct Patient {
     int id;
     char name[50];
     int age;
     char gender[10];
+    char severity[20];
     char disease[50];
-    struct Patient* next;  // porer patient input
+    struct Patient* next;
 } Patient;
+Patient* patientHead = NULL;
 
 typedef struct Doctor {
     int id;
@@ -20,12 +29,10 @@ typedef struct Doctor {
     int availableSlots;
     struct Doctor* next;
 } Doctor;
-
-// Global head pointer for the linked list of doctors
 Doctor* doctorHead = NULL;
 
 typedef struct Appointment {
-    int patientID;
+    char patientNam[50];
     int doctorID;
     struct Appointment* next;
 } Appointment;
@@ -33,17 +40,76 @@ typedef struct Appointment {
 Appointment* appointmentFront = NULL;  // Queue front
 Appointment* appointmentRear = NULL;   // Queue rear
 
-Patient* patientHead = NULL;
+Patient* searchPatientByID(int id) {
+    Patient* temp = patientHead;
+    while (temp != NULL) {
+        if (temp->id == id) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;  // Return NULL if the patient is not found
+}
+
+Doctor* searchDoctorByID(int id) {
+    Doctor* temp = doctorHead;
+    while (temp != NULL) {
+        if (temp->id == id) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;  // Doctor not found
+}
+
 void menu();
 void login();
+void admin();
+void initializeDoctors();
 void returnlanding();
+void slowTxt();
+void addPatient();
+void loadPatientsFromFile();
+void savePatientsToFile();
+void displayPatients();
+void firstinterface();
+void inputPatientData();
+void updatePatient();
+void deletePatient();
+void deletePatientByID();
+void makeAppointment();
+void browseDoctorsBySpecialty();
+
+int main() {
+    system("cls");
+    initializeDoctors();
+    loadPatientsFromFile();
+    firstinterface();
+    login();
+    system("cls");
+    return 0;
+}
+
+void firstinterface() {
+    char ab[] = "||||||||||||||||||||||||||||||||||||||||||||";
+    char ar[] = "||||||||   Welcome to our project   ||||||||";
+    printf("\n\n\t%s\n", ab);
+    printf("\t");
+    for (int i = 0; i < sizeof(ar) - 1; i++) {
+        Sleep(25);
+        printf("\033[1m%c", ar[i]);
+    }
+    printf("\033[0m\n");
+    printf("\t%s\n", ab);
+    printf("\n\n");
+}
 
 void slowTxt(char* str) {
     system("CLS");
     printf("\n\n");
     printf("\t=============================================\n");
     Sleep(20);
-    printf("\n\t    Student Information Management System\n\n");
+    printf("\n\t        Hospital Management System\n\n");
     Sleep(20);
     printf("\t=============================================\n");
     Sleep(20);
@@ -56,13 +122,70 @@ void slowTxt(char* str) {
     printf("\n\n");
 }
 
-void addPatient(int id, const char* name, int age, const char* gender, const char* disease) {  // patient add er function
+void loadPatientsFromFile() {
+    FILE* file = fopen("patients.dat", "r");
+    if (file == NULL) {
+        printf("\tNo patient data found. Starting fresh.\n");
+        return;
+    }
+
+    Patient* temp = NULL;
+
+    while (1) {
+        Patient* newPatient = (Patient*)malloc(sizeof(Patient));
+        if (newPatient == NULL) {
+            printf("\tMemory allocation failed.\n");
+            break;
+        }
+
+        // Read patient data
+        if (fscanf(file, "%d,%49[^,],%d,%9[^,],%19[^,],%49[^\n]\n",
+                   &newPatient->id, newPatient->name, &newPatient->age,
+                   newPatient->gender, newPatient->severity, newPatient->disease) == 6) {
+            newPatient->next = NULL;
+            if (patientHead == NULL) {
+                patientHead = newPatient;
+                temp = patientHead;
+            } else {
+                temp->next = newPatient;
+                temp = newPatient;
+            }
+        } else {
+            free(newPatient);  // Free allocated memory if the line is invalid
+            break;
+        }
+    }
+
+    fclose(file);
+    // printf("\tPatient data loaded successfully.\n");
+}
+
+void savePatientsToFile() {
+    FILE* file = fopen("patients.dat", "w");
+    if (file == NULL) {
+        printf("Error: Unable to save patient data.\n");
+        return;
+    }
+
+    Patient* temp = patientHead;
+    while (temp != NULL) {
+        fprintf(file, "%d,%s,%d,%s,%s,%s\n", temp->id, temp->name, temp->age,
+                temp->gender, temp->severity, temp->disease);
+        temp = temp->next;
+    }
+
+    fclose(file);
+    printf("Patient data saved successfully.\n");
+}
+
+void addPatient(int id, const char* name, int age, const char* gender, const char* disease, const char* severity) {
     Patient* newPatient = (Patient*)malloc(sizeof(Patient));
     newPatient->id = id;
     strcpy(newPatient->name, name);
     newPatient->age = age;
     strcpy(newPatient->gender, gender);
     strcpy(newPatient->disease, disease);
+    strcpy(newPatient->severity, severity);
     newPatient->next = NULL;
 
     if (patientHead == NULL) {
@@ -76,25 +199,6 @@ void addPatient(int id, const char* name, int age, const char* gender, const cha
     }
 }
 
-// void addDoctor(int id, const char* name, const char* specialty, int availableSlots) {  // doctor er function
-//     Doctor* newDoctor = (Doctor*)malloc(sizeof(Doctor));
-//     newDoctor->id = id;
-//     strcpy(newDoctor->name, name);
-//     strcpy(newDoctor->specialty, specialty);
-//     newDoctor->availableSlots = availableSlots;
-//     newDoctor->next = NULL;
-
-//     if (doctorHead == NULL) {
-//         doctorHead = newDoctor;
-//     } else {
-//         Doctor* temp = doctorHead;
-//         while (temp->next != NULL) {
-//             temp = temp->next;
-//         }
-//         temp->next = newDoctor;
-//     }
-// }
-
 void displayPatients() {
     Patient* temp = patientHead;
     char ar[] = "Patient List:";
@@ -105,45 +209,17 @@ void displayPatients() {
     }
     printf("\n");
     while (temp != NULL) {
-        printf("\t\tID: %d, Name: %s, Age: %d, Gender: %s, Disease: %s\n", temp->id, temp->name, temp->age, temp->gender, temp->disease);
+        // printf("\t\tID: %d, Name: %s, Age: %d, Gender: %s, Disease: %s\n", temp->id, temp->name, temp->age, temp->gender, temp->disease);
+        printf("\t\tID      : %d\n\t\tName    : %s\n\t\tAge     : %d\n\t\tGender  : %s\n\t\tDisease : %s\n", temp->id, temp->name, temp->age, temp->gender, temp->disease);
         temp = temp->next;
+        printf("\n");
     }
     printf("\n");
 }
 
-// void displayDoctors() {
-//     Doctor* temp = doctorHead;
-//     char ar[] = "Doctor List:";
-//     printf("\t");
-//     for (int i = 0; i < sizeof(ar) - 1; i++) {
-//         Sleep(25);
-//         printf("%c", ar[i]);
-//     }
-//     printf("\n");
-//     while (temp != NULL) {
-//         printf("\t\tID: %d, Name: %s, Specialty: %s, Available Slots: %d\n", temp->id, temp->name, temp->specialty, temp->availableSlots);
-//         temp = temp->next;
-//     }
-//     printf("\n");
-// }
-
-void firstinterface() {
-    char ab[] = "||||||||||||||||||||||||||||||||||||";
-    char ar[] = "||||   Welcome to our project   ||||";
-    printf("\n\n\t%s\n", ab);
-    printf("\t");
-    for (int i = 0; i < sizeof(ar) - 1; i++) {
-        Sleep(25);
-        printf("\033[1m%c", ar[i]);
-    }
-    printf("\033[0m\n");
-    printf("\t%s\n", ab);
-    printf("\n\n");
-}
-
 void inputPatientData() {
     int id, age;
-    char name[50], gender[10], disease[50];
+    char name[50], gender[10], disease[50], severity[20];
     char s[] = "You wanted to add a new Patient. \n\tPlease enter his/her detailed information";
     slowTxt(s);
 
@@ -164,58 +240,14 @@ void inputPatientData() {
     printf("\tEnter Patient Disease: ");
     scanf(" %[^\n]s", disease);
 
-    addPatient(id, name, age, gender, disease);  // Call the addPatient function
+    printf("\tEnter Severity (e.g., Mild, Moderate, Severe): ");
+    scanf(" %[^\n]s", severity);
+
+    addPatient(id, name, age, gender, disease, severity);  // Call the updated addPatient function
     printf("\tPatient details added successfully!\n\n");
     printf("\t=============================================\n");
+    savePatientsToFile();
 }
-
-// void inputDoctorData() {
-//     int id, availableSlots;
-//     char name[50], specialty[50];
-
-//     char s[] = "You wanted to add a new doctor. \n\tPlease enter his/her detailed information";
-//     slowTxt(s);
-
-//     printf("\t=============================================\n");
-//     printf("\n");
-//     printf("\tEnter Doctor ID: ");
-//     scanf("%d", &id);
-
-//     printf("\tEnter Doctor Name: ");
-//     scanf(" %[^\n]s", name);
-
-//     printf("\tEnter Doctor Specialty: ");
-//     scanf(" %[^\n]s", specialty);
-
-//     printf("\tEnter Available Slots: ");
-//     scanf("%d", &availableSlots);
-
-//     addDoctor(id, name, specialty, availableSlots);
-//     printf("\tDoctor added successfully!\n\n");
-//     printf("\t=============================================\n");
-// }
-
-Patient* searchPatientByID(int id) {
-    Patient* temp = patientHead;
-    while (temp != NULL) {
-        if (temp->id == id) {
-            return temp;
-        }
-        temp = temp->next;
-    }
-    return NULL;  // Return NULL if the patient is not found
-}
-
-// Doctor* searchDoctorByID(int id) {
-//     Doctor* temp = doctorHead;
-//     while (temp != NULL) {
-//         if (temp->id == id) {
-//             return temp;
-//         }
-//         temp = temp->next;
-//     }
-//     return NULL;  // Return NULL if the doctor is not found
-// }
 
 void updatePatient(int id) {
     Patient* patient = searchPatientByID(id);
@@ -224,34 +256,17 @@ void updatePatient(int id) {
         return;
     }
 
-    printf("Enter New Patient Name: ");
+    printf("\tEnter New Patient Name: ");
     scanf(" %[^\n]s", patient->name);
-    printf("Enter New Patient Age: ");
+    printf("\tEnter New Patient Age: ");
     scanf("%d", &patient->age);
-    printf("Enter New Patient Gender: ");
+    printf("\tEnter New Patient Gender: ");
     scanf(" %[^\n]s", patient->gender);
-    printf("Enter New Patient Disease: ");
+    printf("\tEnter New Patient Disease: ");
     scanf(" %[^\n]s", patient->disease);
 
-    printf("Patient information updated successfully!\n");
+    printf("\tPatient information updated successfully!\n");
 }
-
-// void updateDoctor(int id) {
-//     Doctor* doctor = searchDoctorByID(id);
-//     if (doctor == NULL) {
-//         printf("Doctor with ID %d not found.\n", id);
-//         return;
-//     }
-
-//     printf("Enter New Doctor Name: ");
-//     scanf(" %[^\n]s", doctor->name);
-//     printf("Enter New Doctor Specialty: ");
-//     scanf(" %[^\n]s", doctor->specialty);
-//     printf("Enter New Available Slots: ");
-//     scanf("%d", &doctor->availableSlots);
-
-//     printf("Doctor information updated successfully!\n");
-// }
 
 void deletePatient(int id) {
     Patient *temp = patientHead, *prev = NULL;
@@ -260,7 +275,7 @@ void deletePatient(int id) {
     if (temp != NULL && temp->id == id) {
         patientHead = temp->next;  // Move head to the next node
         free(temp);                // Free the old head
-        printf("Patient with ID %d deleted successfully.\n", id);
+        printf("\tPatient with ID %d deleted successfully.\n", id);
         return;
     }
 
@@ -272,6 +287,41 @@ void deletePatient(int id) {
 
     // If patient not found
     if (temp == NULL) {
+        printf("\tPatient with ID %d not found.\n", id);
+        return;
+    }
+
+    // Remove the patient from the linked list
+    prev->next = temp->next;
+    free(temp);
+    printf("\tPatient with ID %d deleted successfully.\n", id);
+}
+
+void deletePatientByID(int id) {
+    if (patientHead == NULL) {
+        printf("No patients to delete.\n");
+        return;
+    }
+
+    Patient *temp = patientHead, *prev = NULL;
+
+    // If the head is the patient to delete
+    if (temp->id == id) {
+        patientHead = temp->next;  // Move the head
+        free(temp);                // Free the old head
+        printf("Patient with ID %d deleted successfully.\n", id);
+        savePatientsToFile();  // Save updated patient list to file
+        return;
+    }
+
+    // Search for the patient to delete
+    while (temp != NULL && temp->id != id) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    // If the patient was not found
+    if (temp == NULL) {
         printf("Patient with ID %d not found.\n", id);
         return;
     }
@@ -280,39 +330,9 @@ void deletePatient(int id) {
     prev->next = temp->next;
     free(temp);
     printf("Patient with ID %d deleted successfully.\n", id);
-}
 
-// void deleteDoctor(int id) {
-//     Doctor *temp = doctorHead, *prev = NULL;
-
-//     // Check if the head node contains the doctor
-//     if (temp != NULL && temp->id == id) {
-//         doctorHead = temp->next;  // Move head to the next node
-//         free(temp);               // Free the old head
-//         printf("Doctor with ID %d deleted successfully.\n", id);
-//         return;
-//     }
-
-//     // Traverse the list to find the doctor
-//     while (temp != NULL && temp->id != id) {
-//         prev = temp;
-//         temp = temp->next;
-//     }
-
-//     // If doctor not found
-//     if (temp == NULL) {
-//         printf("Doctor with ID %d not found.\n", id);
-//         return;
-//     }
-
-//     // Remove the doctor from the linked list
-//     prev->next = temp->next;
-//     free(temp);
-//     printf("Doctor with ID %d deleted successfully.\n", id);
-// }
-
-void admin() {
-    login();
+    // Save updated list to the file
+    savePatientsToFile();
 }
 
 void initializeDoctors() {
@@ -323,12 +343,12 @@ void initializeDoctors() {
         "Cardiology", "Orthopedics", "Dermatology", "Pediatrics", "Neurology"};
 
     // Doctor names for each specialty
-    char doctorNames[5][5][50] = {
-        {"Dr. Alice Smith", "Dr. John Doe", "Dr. Clara Brown", "Dr. Max Payne", "Dr. Lisa Ray"},
-        {"Dr. Bob Johnson", "Dr. Megan Clark", "Dr. George White", "Dr. Sarah Hill", "Dr. Chris Evans"},
-        {"Dr. Charlie Lee", "Dr. Emily Stone", "Dr. Kevin Green", "Dr. Nina Scott", "Dr. Oliver Blue"},
-        {"Dr. Diana Martinez", "Dr. Bruce Wayne", "Dr. Rachel Grey", "Dr. Tony Stark", "Dr. Natasha Romanoff"},
-        {"Dr. Edward Black", "Dr. Laura White", "Dr. Henry Gold", "Dr. Fiona Red", "Dr. Victor Grey"}};
+    char doctorNames[5][5][100] = {
+        {"Assoc. Prof. Dr. Bijoy Dutta", "Prof. Dr. Md. Sahabuddin Khan", "Prof. Dr. Toufiqur Rahman Faruque", "Dr. AKS Zahid Mahmud Khan", "Prof. Dr. Ashok Kumar Dutta"},
+        {"Asst. Prof. Dr. Md. Nazmul Huda", "Dr. Md. Mizanur Rahman", "Dr. M A Mamun", "Dr. K M Shorfuddin Ashik", "Prof. Dr. Md. Kamrul Ahsan"},
+        {"Dr. Asif Imran Siddiqui", "Dr. Farzana Rahman Shathi", "Prof. Dr. M.N. Huda", "Prof. Lt. Col. Dr. Md. Abdul Wahab", "Prof. Dr. M. U. Kabir Chowdhury"},
+        {"Dr. Mithun Sarker", "Dr. Chowdhury Md. Niazuzzaman", "Dr. Hasan Mahmud Abdullah", "Dr. Md. Zahidul Islam", "Dr. Md. Waliur Rahman"},
+        {"Dr. Shamim Rashid", "Dr. Md. Shuktarul Islam (Tamim)", "Dr. Mohiuddin Ahmed", "Dr. Rakib Hasan Mohammad", "Prof. Dr. Subash Kanti Dey"}};
 
     // Slots available for each doctor
     int slots[5][5] = {
@@ -359,19 +379,6 @@ void initializeDoctors() {
             }
         }
     }
-
-    // printf("Doctors initialized successfully.\n");
-}
-
-Doctor* searchDoctorByID(int id) {
-    Doctor* temp = doctorHead;
-    while (temp != NULL) {
-        if (temp->id == id) {
-            return temp;
-        }
-        temp = temp->next;
-    }
-    return NULL;  // Doctor not found
 }
 
 void makeAppointment(char patientName[], int doctorID) {
@@ -390,9 +397,11 @@ void makeAppointment(char patientName[], int doctorID) {
     // Reduce the available slots and schedule the appointment
     doctor->availableSlots--;
 
-    printf("Appointment confirmed for Patient: %s with Doctor ID %d (%s).\n",
-           patientName, doctorID, doctor->name);
-    printf("Your slot number is %d.\n", doctor->availableSlots + 1);
+    printf("Appointment confirmed for Patient: %s with Doctor ID %d (%s).\n", patientName, doctorID, doctor->name);
+    // printf("Your slot number is %d.\n", doctor->availableSlots + 1);
+    // printf("%d %d\n",(doctorID - 1) / 5,(doctorID - 1) % 5);
+    // printf("%d\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5]);
+    printf("Your slot number is %d.\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5] - doctor->availableSlots);
 
     returnlanding();
 }
@@ -419,17 +428,19 @@ void browseDoctorsBySpecialty() {
     }
 
     // Step 2: Display specialties
-    printf("\nAvailable Specialties:\n");
+    printf("\t=============================================\n\n");
+    printf("\tAvailable Specialties:\n");
     for (int i = 0; i < specialtyCount; i++) {
-        printf("%d. %s\n", i + 1, specialties[i]);
+        printf("\t%d. %s\n", i + 1, specialties[i]);
     }
+    printf("\n\t=============================================\n\n");
 
-    printf("Enter the number of the specialty you want to browse: ");
+    printf("\tEnter the number of the specialty you want to browse: ");
     int choice;
     scanf("%d", &choice);
 
     if (choice < 1 || choice > specialtyCount) {
-        printf("Invalid choice! Returning to Patient Menu.\n");
+        printf("\n\tInvalid choice! Returning to Patient Menu.\n");
         return;
     }
 
@@ -438,19 +449,21 @@ void browseDoctorsBySpecialty() {
     strcpy(selectedSpecialty, specialties[choice - 1]);
     temp = doctorHead;
 
-    printf("\nDoctors in Specialty: %s\n", selectedSpecialty);
+    printf("\t=============================================\n\n");
+    printf("\tDoctors in Specialty: %s\n", selectedSpecialty);
     int doctorFound = 0;
     while (temp != NULL) {
         if (strcmp(temp->specialty, selectedSpecialty) == 0) {
-            printf("Doctor ID: %d, Name: %s, Slots Available: %d\n",
+            printf("\t\033[1mDoctor ID: %d\033[0m \n\t\tName            : %s\n\t\tSlots Available : %d\n\n",
                    temp->id, temp->name, temp->availableSlots);
             doctorFound = 1;
         }
         temp = temp->next;
     }
+    printf("\n\t=============================================\n\n");
 
     if (!doctorFound) {
-        printf("No doctors available for this specialty.\n");
+        printf("\n\tNo doctors available for this specialty.\n");
         return;
     }
 
@@ -465,26 +478,12 @@ void browseDoctorsBySpecialty() {
     scanf("%d", &doctorID);
 
     makeAppointment(patientName, doctorID);
-    returnlanding();
-}
-
-int main() {
-    system("cls");
-    initializeDoctors();
-    // firstinterface();
-    admin();
-    system("cls");
-    // Sleep(5000);
-    // system("color 0C");
-    // system("cls");
-    return 0;
 }
 
 void menu() {
     int choice, id;
     printf("\n\n");
-    printf("\t=============================================\n");
-    printf("\n");
+    printf("\t=============================================\n\n");
     printf("\t[1] Add New Patient\n");
     printf("\t[2] Display Patients\n");
     printf("\t[3] Search Patient by ID\n");
@@ -508,8 +507,7 @@ void menu() {
             scanf("%d", &id);
             Patient* patient = searchPatientByID(id);
             if (patient) {
-                printf("\tPatient Found: ID: %d, Name: %s, Age: %d, Gender: %s, Disease: %s\n",
-                       patient->id, patient->name, patient->age, patient->gender, patient->disease);
+                printf("\tPatient Found: \n\t\tID      : %d\n\t\tName    : %s\n\t\tAge     : %d\n\t\tGender  : %s\n\t\tDisease : %s\n", patient->id, patient->name, patient->age, patient->gender, patient->disease);
             } else {
                 printf("\tPatient not found.\n");
             }
@@ -522,7 +520,7 @@ void menu() {
         case 5:
             printf("\tEnter Patient ID to delete: ");
             scanf("%d", &id);
-            deletePatient(id);
+            deletePatientByID(id);
             break;
         case 6:
             login();
@@ -538,11 +536,12 @@ void menu() {
 
 void login() {
     int j;
-    printf("\n\n\t\t\t1. Admin Login\n\n");
-    printf("\t\t\t2. User Login\n\n");
+    printf("\t=============================================\n\n");
+    printf("\n\t\t\t1. Admin Login\n\n");
+    printf("\t\t\t2. For Patient\n\n");
 
     int x;
-    printf("Enter Your Choice :");
+    printf("\tEnter Your Choice : ");
     scanf("%d", &x);
     if (x == 1) {
         int pass = 1234, pas;
@@ -554,7 +553,14 @@ void login() {
         scanf("%d", &pas);
 
         if (pass == pas) {
-            printf("  \n\n\n       WELCOME !!!! LOGIN IS SUCCESSFUL\n");
+            printf("  \n\n\n");
+            char str[] = "       WELCOME !!!! LOGIN IS SUCCESSFUL";
+            int x = strlen(str);
+            for (int i = 0; i < x; i++) {
+                printf("%c", str[i]);
+                Sleep(20);
+            }
+            Sleep(1000);
             system("cls");
             // system("color 8f");
             printf("\n\n\n\n\n\n");
