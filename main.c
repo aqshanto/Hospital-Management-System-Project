@@ -37,8 +37,8 @@ typedef struct Appointment {
     struct Appointment* next;
 } Appointment;
 
-Appointment* appointmentFront = NULL;  // Queue front
-Appointment* appointmentRear = NULL;   // Queue rear
+Appointment* appointmentFront = NULL;
+Appointment* appointmentRear = NULL;
 
 Patient* searchPatientByID(int id) {
     Patient* temp = patientHead;
@@ -59,7 +59,7 @@ Doctor* searchDoctorByID(int id) {
         }
         temp = temp->next;
     }
-    return NULL;  // Doctor not found
+    return NULL;
 }
 
 void menu();
@@ -112,33 +112,28 @@ void deletePatientByID(int id) {
 
     Patient *temp = patientHead, *prev = NULL;
 
-    // If the head is the patient to delete
     if (temp->id == id) {
-        patientHead = temp->next;  // Move the head
-        free(temp);                // Free the old head
+        patientHead = temp->next;
+        free(temp);
         printf("Patient with ID %d deleted successfully.\n", id);
-        savePatientsToFile();  // Save updated patient list to file
+        savePatientsToFile();
         return;
     }
 
-    // Search for the patient to delete
     while (temp != NULL && temp->id != id) {
         prev = temp;
         temp = temp->next;
     }
 
-    // If the patient was not found
     if (temp == NULL) {
         printf("Patient with ID %d not found.\n", id);
         return;
     }
 
-    // Remove the patient from the linked list
     prev->next = temp->next;
     free(temp);
     printf("Patient with ID %d deleted successfully.\n", id);
 
-    // Save updated list to the file
     savePatientsToFile();
 }
 
