@@ -573,6 +573,7 @@ void login() {
     }
 
     if (x == 2) {
+        system("cls");
         printf("\n");
         printf("\t\t\t1. Make Appointment.\n\n");
         int a;
