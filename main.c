@@ -171,7 +171,6 @@ void loadPatientsFromFile() {
             break;
         }
 
-        // Read patient data
         if (fscanf(file, "%d,%49[^,],%d,%9[^,],%19[^,],%49[^\n]\n",
                    &newPatient->id, newPatient->name, &newPatient->age,
                    newPatient->gender, newPatient->severity, newPatient->disease) == 6) {
@@ -184,13 +183,12 @@ void loadPatientsFromFile() {
                 temp = newPatient;
             }
         } else {
-            free(newPatient);  // Free allocated memory if the line is invalid
+            free(newPatient);
             break;
         }
     }
 
     fclose(file);
-    // printf("\tPatient data loaded successfully.\n");
 }
 
 void savePatientsToFile() {
