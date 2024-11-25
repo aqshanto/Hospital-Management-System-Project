@@ -260,7 +260,7 @@ void inputPatientData() {
     scanf("%d", &id);
 
     printf("\tEnter Patient Name: ");
-    scanf(" %[^\n]s", name);  // Using " %[^\n]s" to read a full line with spaces
+    scanf(" %[^\n]s", name);
 
     printf("\tEnter Patient Age: ");
     scanf("%d", &age);
@@ -274,7 +274,7 @@ void inputPatientData() {
     printf("\tEnter Severity (e.g., Mild, Moderate, Severe): ");
     scanf(" %[^\n]s", severity);
 
-    addPatient(id, name, age, gender, disease, severity);  // Call the updated addPatient function
+    addPatient(id, name, age, gender, disease, severity);
     printf("\tPatient details added successfully!\n\n");
     printf("\t=============================================\n");
     savePatientsToFile();
@@ -304,40 +304,34 @@ void updatePatient(int id) {
 void deletePatient(int id) {
     Patient *temp = patientHead, *prev = NULL;
 
-    // Check if the head node contains the patient
     if (temp != NULL && temp->id == id) {
-        patientHead = temp->next;  // Move head to the next node
-        free(temp);                // Free the old head
+        patientHead = temp->next;
+        free(temp);
         printf("\tPatient with ID %d deleted successfully.\n", id);
         return;
     }
 
-    // Traverse the list to find the patient
     while (temp != NULL && temp->id != id) {
         prev = temp;
         temp = temp->next;
     }
 
-    // If patient not found
     if (temp == NULL) {
         printf("\tPatient with ID %d not found.\n", id);
         return;
     }
 
-    // Remove the patient from the linked list
     prev->next = temp->next;
     free(temp);
     printf("\tPatient with ID %d deleted successfully.\n", id);
 }
 
 void initializeDoctors() {
-    doctorHead = NULL;  // Initialize the head of the linked list
+    doctorHead = NULL;
 
-    // Specialties
     char specialties[5][50] = {
         "Cardiology", "Orthopedics", "Dermatology", "Pediatrics", "Neurology"};
 
-    // Doctor names for each specialty
     char doctorNames[5][5][100] = {
         {"Assoc. Prof. Dr. Bijoy Dutta", "Prof. Dr. Md. Sahabuddin Khan", "Prof. Dr. Toufiqur Rahman Faruque", "Dr. AKS Zahid Mahmud Khan", "Prof. Dr. Ashok Kumar Dutta"},
         {"Asst. Prof. Dr. Md. Nazmul Huda", "Dr. Md. Mizanur Rahman", "Dr. M A Mamun", "Dr. K M Shorfuddin Ashik", "Prof. Dr. Md. Kamrul Ahsan"},
@@ -345,21 +339,19 @@ void initializeDoctors() {
         {"Dr. Mithun Sarker", "Dr. Chowdhury Md. Niazuzzaman", "Dr. Hasan Mahmud Abdullah", "Dr. Md. Zahidul Islam", "Dr. Md. Waliur Rahman"},
         {"Dr. Shamim Rashid", "Dr. Md. Shuktarul Islam (Tamim)", "Dr. Mohiuddin Ahmed", "Dr. Rakib Hasan Mohammad", "Prof. Dr. Subash Kanti Dey"}};
 
-    // Slots available for each doctor
-    int slots[5][5] = {
-        {3, 5, 4, 2, 6},
-        {4, 3, 5, 2, 1},
-        {6, 4, 3, 2, 5},
-        {2, 3, 5, 6, 4},
-        {5, 6, 4, 3, 2}};
+    // int slots[5][5] = {
+    //     {3, 5, 4, 2, 6},
+    //     {4, 3, 5, 2, 1},
+    //     {6, 4, 3, 2, 5},
+    //     {2, 3, 5, 6, 4},
+    //     {5, 6, 4, 3, 2}};
 
-    // Populate the doctor list
     Doctor* temp = NULL;
 
-    for (int i = 0; i < 5; i++) {      // Loop through specialties
-        for (int j = 0; j < 5; j++) {  // Loop through doctors in each specialty
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
             Doctor* newDoctor = (Doctor*)malloc(sizeof(Doctor));
-            newDoctor->id = i * 5 + j + 1;  // Generate unique IDs
+            newDoctor->id = i * 5 + j + 1;
             strcpy(newDoctor->name, doctorNames[i][j]);
             strcpy(newDoctor->specialty, specialties[i]);
             newDoctor->availableSlots = slots[i][j];
@@ -389,7 +381,6 @@ void makeAppointment(char patientName[], int doctorID) {
         return;
     }
 
-    // Reduce the available slots and schedule the appointment
     doctor->availableSlots--;
 
     printf("Appointment confirmed for Patient: %s with Doctor ID %d (%s).\n", patientName, doctorID, doctor->name);
@@ -403,10 +394,9 @@ void makeAppointment(char patientName[], int doctorID) {
 
 void browseDoctorsBySpecialty() {
     Doctor* temp = doctorHead;
-    char specialties[10][50];  // Assuming a maximum of 10 specialties
+    char specialties[10][50];
     int specialtyCount = 0;
 
-    // Step 1: Extract unique specialties
     while (temp != NULL) {
         int found = 0;
         for (int i = 0; i < specialtyCount; i++) {
@@ -422,7 +412,6 @@ void browseDoctorsBySpecialty() {
         temp = temp->next;
     }
 
-    // Step 2: Display specialties
     printf("\t=============================================\n\n");
     printf("\tAvailable Specialties:\n");
     for (int i = 0; i < specialtyCount; i++) {
@@ -439,7 +428,6 @@ void browseDoctorsBySpecialty() {
         return;
     }
 
-    // Step 3: Show doctors in the selected specialty
     char selectedSpecialty[50];
     strcpy(selectedSpecialty, specialties[choice - 1]);
     temp = doctorHead;
@@ -462,7 +450,6 @@ void browseDoctorsBySpecialty() {
         return;
     }
 
-    // Step 4: Allow patient to make an appointment
     char patientName[50];
     int doctorID;
 
