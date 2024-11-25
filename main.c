@@ -573,13 +573,12 @@ void login() {
     }
 
     if (x == 2) {
-        printf("\n\n\t\t\t1. Our Services.\n");
-        printf("\t\t\t2. Make Appointment.\n\n");
+        printf("\n");
+        printf("\t\t\t1. Make Appointment.\n\n");
         int a;
         printf("\tEnter your Choice: ");
         scanf("%d", &a);
         if (a == 1) {
-        } else if (a == 2) {
             browseDoctorsBySpecialty();
         }
     }
