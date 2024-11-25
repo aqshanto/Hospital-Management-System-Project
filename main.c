@@ -240,7 +240,6 @@ void displayPatients() {
     }
     printf("\n");
     while (temp != NULL) {
-        // printf("\t\tID: %d, Name: %s, Age: %d, Gender: %s, Disease: %s\n", temp->id, temp->name, temp->age, temp->gender, temp->disease);
         printf("\t\tID      : %d\n\t\tName    : %s\n\t\tAge     : %d\n\t\tGender  : %s\n\t\tDisease : %s\n", temp->id, temp->name, temp->age, temp->gender, temp->disease);
         temp = temp->next;
         printf("\n");
@@ -387,7 +386,7 @@ void makeAppointment(char patientName[], int doctorID) {
     // printf("Your slot number is %d.\n", doctor->availableSlots + 1);
     // printf("%d %d\n",(doctorID - 1) / 5,(doctorID - 1) % 5);
     // printf("%d\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5]);
-    printf("Your slot number is %d.\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5] - doctor->availableSlots);
+    printf("Your serial number is %d.\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5] - doctor->availableSlots);
 
     returnlanding();
 }
