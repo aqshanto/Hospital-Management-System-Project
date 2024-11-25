@@ -158,7 +158,7 @@ void slowTxt(char* str) {
 void loadPatientsFromFile() {
     FILE* file = fopen("patients.dat", "r");
     if (file == NULL) {
-        printf("\tNo patient data found. Starting fresh.\n");
+        // printf("\tNo patient data found. Starting fresh.\n");
         return;
     }
 
