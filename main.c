@@ -320,9 +320,6 @@ void makeAppointment(char patientName[], int doctorID) {
     doctor->availableSlots--;
 
     printf("\tAppointment confirmed for Patient: %s with Doctor ID %d (%s).\n", patientName, doctorID, doctor->name);
-    // printf("Your slot number is %d.\n", doctor->availableSlots + 1);
-    // printf("%d %d\n",(doctorID - 1) / 5,(doctorID - 1) % 5);
-    // printf("%d\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5]);
     printf("\tYour serial number is %d.\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5] - doctor->availableSlots);
 
     returnlanding();
