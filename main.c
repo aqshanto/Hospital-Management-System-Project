@@ -69,13 +69,10 @@ void initializeDoctors();
 void returnlanding();
 void slowTxt();
 void addPatient();
-void loadPatientsFromFile();
-void savePatientsToFile();
 void displayPatients();
 void firstinterface();
 void inputPatientData();
 void updatePatient();
-void deletePatient();
 void deletePatientByID();
 void makeAppointment();
 void browseDoctorsBySpecialty();
@@ -83,7 +80,6 @@ void browseDoctorsBySpecialty();
 int main() {
     system("cls");
     initializeDoctors();
-    loadPatientsFromFile();
     firstinterface();
     login();
     system("cls");
@@ -116,7 +112,6 @@ void deletePatientByID(int id) {
         patientHead = temp->next;
         free(temp);
         printf("Patient with ID %d deleted successfully.\n", id);
-        savePatientsToFile();
         return;
     }
 
@@ -133,8 +128,6 @@ void deletePatientByID(int id) {
     prev->next = temp->next;
     free(temp);
     printf("Patient with ID %d deleted successfully.\n", id);
-
-    savePatientsToFile();
 }
 
 void slowTxt(char* str) {
@@ -153,60 +146,6 @@ void slowTxt(char* str) {
         Sleep(20);
     }
     printf("\n\n");
-}
-
-void loadPatientsFromFile() {
-    FILE* file = fopen("patients.dat", "r");
-    if (file == NULL) {
-        // printf("\tNo patient data found. Starting fresh.\n");
-        return;
-    }
-
-    Patient* temp = NULL;
-
-    while (1) {
-        Patient* newPatient = (Patient*)malloc(sizeof(Patient));
-        if (newPatient == NULL) {
-            printf("\tMemory allocation failed.\n");
-            break;
-        }
-
-        if (fscanf(file, "%d,%49[^,],%d,%9[^,],%19[^,],%49[^\n]\n",
-                   &newPatient->id, newPatient->name, &newPatient->age,
-                   newPatient->gender, newPatient->severity, newPatient->disease) == 6) {
-            newPatient->next = NULL;
-            if (patientHead == NULL) {
-                patientHead = newPatient;
-                temp = patientHead;
-            } else {
-                temp->next = newPatient;
-                temp = newPatient;
-            }
-        } else {
-            free(newPatient);
-            break;
-        }
-    }
-
-    fclose(file);
-}
-
-void savePatientsToFile() {
-    FILE* file = fopen("patients.dat", "w");
-    if (file == NULL) {
-        printf("Error: Unable to save patient data.\n");
-        return;
-    }
-
-    Patient* temp = patientHead;
-    while (temp != NULL) {
-        fprintf(file, "%d,%s,%d,%s,%s,%s\n", temp->id, temp->name, temp->age,
-                temp->gender, temp->severity, temp->disease);
-        temp = temp->next;
-    }
-
-    fclose(file);
-    printf("\tPatient data saved successfully.\n");
 }
 
 void addPatient(int id, const char* name, int age, const char* gender, const char* disease, const char* severity) {
@@ -276,7 +215,6 @@ void inputPatientData() {
     addPatient(id, name, age, gender, disease, severity);
     printf("\tPatient details added successfully!\n\n");
     printf("\t=============================================\n");
-    savePatientsToFile();
 }
 
 void updatePatient(int id) {
@@ -296,7 +234,6 @@ void updatePatient(int id) {
     scanf(" %[^\n]s", patient->disease);
     printf("\tEnter Severity (e.g., Mild, Moderate, Severe): ");
     scanf(" %[^\n]s", patient->severity);
-    savePatientsToFile();
     printf("\tPatient information updated successfully!\n");
 }
 
@@ -443,11 +380,6 @@ void browseDoctorsBySpecialty() {
         temp = temp->next;
     }
     printf("\n\t=============================================\n\n");
-
-    if (!doctorFound) {
-        printf("\n\tNo doctors available for this specialty.\n");
-        return;
-    }
 
     char patientName[50];
     int doctorID;
