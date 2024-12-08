@@ -308,22 +308,22 @@ void makeAppointment(char patientName[], int doctorID) {
     Doctor* doctor = searchDoctorByID(doctorID);
 
     if (doctor == NULL) {
-        printf("Doctor with ID %d not found.\n", doctorID);
+        printf("\tDoctor with ID %d not found.\n", doctorID);
         return;
     }
 
     if (doctor->availableSlots <= 0) {
-        printf("No slots available for Doctor ID %d (%s).\n", doctorID, doctor->name);
+        printf("\tNo slots available for Doctor ID %d (%s).\n", doctorID, doctor->name);
         return;
     }
 
     doctor->availableSlots--;
 
-    printf("Appointment confirmed for Patient: %s with Doctor ID %d (%s).\n", patientName, doctorID, doctor->name);
+    printf("\tAppointment confirmed for Patient: %s with Doctor ID %d (%s).\n", patientName, doctorID, doctor->name);
     // printf("Your slot number is %d.\n", doctor->availableSlots + 1);
     // printf("%d %d\n",(doctorID - 1) / 5,(doctorID - 1) % 5);
     // printf("%d\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5]);
-    printf("Your serial number is %d.\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5] - doctor->availableSlots);
+    printf("\tYour serial number is %d.\n", slots[(doctorID - 1) / 5][(doctorID - 1) % 5] - doctor->availableSlots);
 
     returnlanding();
 }
@@ -387,7 +387,7 @@ void browseDoctorsBySpecialty() {
     printf("\tEnter your name: ");
     scanf(" %[^\n]s", patientName);
 
-    printf("Enter the Doctor ID to make an appointment: ");
+    printf("\tEnter the Doctor ID to make an appointment: ");
     scanf("%d", &doctorID);
 
     makeAppointment(patientName, doctorID);
