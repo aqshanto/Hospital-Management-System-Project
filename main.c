@@ -452,7 +452,7 @@ void browseDoctorsBySpecialty() {
     char patientName[50];
     int doctorID;
 
-    printf("\nEnter your name: ");
+    printf("\tEnter your name: ");
     scanf(" %[^\n]s", patientName);
 
     printf("Enter the Doctor ID to make an appointment: ");
@@ -504,6 +504,7 @@ void menu() {
             deletePatientByID(id);
             break;
         case 6:
+            system("cls");
             login();
             break;
         case 7:
