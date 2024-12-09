@@ -37,6 +37,17 @@ typedef struct Appointment {
     struct Appointment* next;
 } Appointment;
 
+Patient* searchPatientByID(int id) {
+    Patient* temp = patientHead;
+    while (temp != NULL) {
+        if (temp->id == id) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;  // Return NULL if the patient is not found
+}
+
 void menu();
 void login();
 void firstinterface();
@@ -149,9 +160,10 @@ void menu() {
 
 void login() {
     int j;
-    printf("\t=============================================\n\n");
+    printf("\t=============================================\n");
     printf("\n\t\t\t1. Admin Login\n\n");
     printf("\t\t\t2. For Patient\n\n");
+    printf("\t=============================================\n\n");
 
     int x;
     printf("\tEnter Your Choice : ");
@@ -223,9 +235,11 @@ void returnlanding() {
     if (x == '0') {
         return;
     } else if (x == 'M' || x == 'm') {
+        system("cls");
         menu();
         return;
     } else {
+        system("cls");
         login();
         return;
     }
@@ -281,17 +295,6 @@ void addPatient(int id, const char* name, int age, const char* gender, const cha
         }
         temp->next = newPatient;
     }
-}
-
-Patient* searchPatientByID(int id) {
-    Patient* temp = patientHead;
-    while (temp != NULL) {
-        if (temp->id == id) {
-            return temp;
-        }
-        temp = temp->next;
-    }
-    return NULL;  // Return NULL if the patient is not found
 }
 
 void deletePatientByID(int id) {
