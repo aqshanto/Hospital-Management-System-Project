@@ -39,13 +39,12 @@ typedef struct Appointment {
 
 void menu();
 void login();
-void admin();
+void firstinterface();
 void initializeDoctors();
 void returnlanding();
 void slowTxt();
 void addPatient();
 void displayPatients();
-void firstinterface();
 void inputPatientData();
 void updatePatient();
 void deletePatientByID();
