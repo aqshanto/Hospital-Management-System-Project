@@ -37,20 +37,6 @@ typedef struct Appointment {
     struct Appointment* next;
 } Appointment;
 
-// Appointment* appointmentFront = NULL;
-// Appointment* appointmentRear = NULL;
-
-Patient* searchPatientByID(int id) {
-    Patient* temp = patientHead;
-    while (temp != NULL) {
-        if (temp->id == id) {
-            return temp;
-        }
-        temp = temp->next;
-    }
-    return NULL;  // Return NULL if the patient is not found
-}
-
 void menu();
 void login();
 void admin();
@@ -298,9 +284,20 @@ void addPatient(int id, const char* name, int age, const char* gender, const cha
     }
 }
 
+Patient* searchPatientByID(int id) {
+    Patient* temp = patientHead;
+    while (temp != NULL) {
+        if (temp->id == id) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;  // Return NULL if the patient is not found
+}
+
 void deletePatientByID(int id) {
     if (patientHead == NULL) {
-        printf("No patients to delete.\n");
+        printf("\tNo patients to delete.\n");
         return;
     }
 
@@ -309,7 +306,7 @@ void deletePatientByID(int id) {
     if (temp->id == id) {
         patientHead = temp->next;
         free(temp);
-        printf("Patient with ID %d deleted successfully.\n", id);
+        printf("\tPatient with ID %d deleted successfully.\n", id);
         return;
     }
 
@@ -319,13 +316,13 @@ void deletePatientByID(int id) {
     }
 
     if (temp == NULL) {
-        printf("Patient with ID %d not found.\n", id);
+        printf("\tPatient with ID %d not found.\n", id);
         return;
     }
 
     prev->next = temp->next;
     free(temp);
-    printf("Patient with ID %d deleted successfully.\n", id);
+    printf("\tPatient with ID %d deleted successfully.\n", id);
 }
 
 void displayPatients() {
@@ -363,31 +360,6 @@ void updatePatient(int id) {
     printf("\tEnter Severity (e.g., Mild, Moderate, Severe): ");
     scanf(" %[^\n]s", patient->severity);
     printf("\tPatient information updated successfully!\n");
-}
-
-void deletePatient(int id) {
-    Patient *temp = patientHead, *prev = NULL;
-
-    if (temp != NULL && temp->id == id) {
-        patientHead = temp->next;
-        free(temp);
-        printf("\tPatient with ID %d deleted successfully.\n", id);
-        return;
-    }
-
-    while (temp != NULL && temp->id != id) {
-        prev = temp;
-        temp = temp->next;
-    }
-
-    if (temp == NULL) {
-        printf("\tPatient with ID %d not found.\n", id);
-        return;
-    }
-
-    prev->next = temp->next;
-    free(temp);
-    printf("\tPatient with ID %d deleted successfully.\n", id);
 }
 
 void initializeDoctors() {
